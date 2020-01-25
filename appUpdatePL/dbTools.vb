@@ -75,6 +75,8 @@ Module DBtools
     Public SelectWeight2 As Double = 0  'เก็บน้ำหนักแผ่น
     Public SelectStock2 As Double = 0 'เก็บStock
     Public SelectPNo2 As String
+    Public selDocNo As String = ""
+
 
     Public CodeT As String = ""
     Public CodeG As String = ""
@@ -122,30 +124,29 @@ Module DBtools
                   ByRef nSize As Integer) As Integer
 
     Public Function GetUserName() As String 'เก็บUsername Passwordของเครื่องคนๆนั้น
+
         Dim iReturn As Integer
         Dim userName As String
         userName = New String(CChar(" "), 50)
         iReturn = GetUserName(userName, 50)
         GetUserName = userName.Substring(0, userName.IndexOf(Chr(0)))
+
     End Function
-    Sub DBConnection()
 
-        strConn = DBConnString.strConn2
-        With Conn
-            If .State = ConnectionState.Open Then .Close()
-            .ConnectionString = strConn
-            .Open()
-        End With
-
-    End Sub
 
     Sub openDB()
-        strConn = DBConnString.strConn2
-        With Conn
-            If .State = ConnectionState.Open Then .Close()
-            .ConnectionString = strConn
-            .Open()
-        End With
+
+        'strConn = DBConnString.strConn2
+        Try
+            With Conn
+                If .State = ConnectionState.Open Then .Close()
+                .ConnectionString = strConn
+                .Open()
+            End With
+        Catch ex As Exception
+            'MsgBox("ไม่สามารถติดต่อฐานข้อมูลได้")
+        End Try
+
 
     End Sub
 
@@ -153,31 +154,13 @@ Module DBtools
         Conn.Close()
     End Sub
 
-    'Sub DBConnection()
-    '    'pathDB = "i:\center\PC50.mdb"
-    '    'pathDB = "i:\center\PC50.mdb"
-    '    'pathDB = "i:\test49\db\test49.mdb"
-    '    'pathDB02 = "i:\center\acct50.mdb"
-    '    'strConn = "server=(local);database=TestDB2006;Trusted_Connection=yes"
-    '    'DB01 = DAODBEngine_definst.OpenDatabase(pathDB)
-    '    ''DB02 = DAODBEngine_definst.OpenDatabase(pathDB02)
-    '    strConn = "server=ENJOY-PC\sqlexpress;database=TestDB2006;Trusted_Connection=yes;" 'connectเครื่องตัวเอง
-    '    'strConn = "server=EDP;database=DB2006;Trusted_Connection=yes;"
-    '    'strConn = "Data Source=EDP2\SQLEXPRESS;Initial Catalog=db2006;User ID=sa;Password=sys0500" 'connect server
-    '    'strConn = "Data Source=Time\SQLEXPRESS;Initial Catalog=backup_db2006;User ID=sa;Password=sys0500" 'connect server
-    '    'strConn = "server=TIME\sqlexpress;database=backup_db2006;Trusted_Connection=yes;" 'connectเครื่องตัวเอง
-    '    With Conn
-    '        If .State = ConnectionState.Open Then .Close()
-    '        .ConnectionString = strConn
-    '        .Open()
-    '    End With
-    'End Sub
 
     Sub dbDelDATA(ByVal txtSQL As String, ByVal txtDisy As String)
         Try
             'If MessageBox.Show("ต้องการลบข้อมูล ' " & txtDisy & " ' ที่ระบุหรือไม่", "คำยืนยัน", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
             'DB01.Execute(txtSQL) ' บันทึกข้อมูลลง Business sc50
             'DB02.Execute(txtSQL) ' บันทึกข้อมูลลง Business acct50
+            If Conn.State = ConnectionState.Closed Then openDB()
             With subCom
                 .CommandType = CommandType.Text
                 .CommandText = txtSQL
@@ -186,26 +169,34 @@ Module DBtools
             End With
             'End If
         Catch errprocess As Exception
-            'MessageBox.Show("ไม่สามารถลบข้อมูลได้เนื่องจาก " & errprocess.Message, "ข้อผิดพลาด", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("ไม่สามารถลบข้อมูลได้เนื่องจาก " & errprocess.Message, "ข้อผิดพลาด", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Exit Sub
         End Try
     End Sub
 
-    Sub dbDelSQLsrv(ByVal txtSQL As String, ByVal txtDisy As String)
+    Sub dbSaveSQLsrv(ByVal txtSQL As String, ByVal txtDisy As String)
 
         Try
-            If MessageBox.Show("ต้องการลบข้อมูล ' " & txtDisy & " ' ที่ระบุหรือไม่", "คำยืนยัน", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
-                'DB01.Execute(txtSQL) ' บันทึกข้อมูลลง Business sc50
-                'DB02.Execute(txtSQL) ' บันทึกข้อมูลลง Business acct50
-                With subCom
-                    .CommandType = CommandType.Text
-                    .CommandText = txtSQL
-                    .Connection = Conn
-                    .ExecuteNonQuery()
-                End With
-            End If
+            ' If MessageBox.Show("ต้องการบันทึกข้อมูล ' " & txtDisy & " ' ที่ระบุหรือไม่", "คำยืนยัน", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
+
+            openDB()
+
+            With subCom
+                .CommandType = CommandType.Text
+                .CommandText = txtSQL
+                .Connection = Conn
+                .ExecuteNonQuery()
+            End With
+            'closeDB()
+            'DB01.Execute(txtSQL)  ' บันทึกข้อมูลลง Business 
+            'DB02.Execute(txtSQL)
+            'MsgBox("ข้อมูลถูกบันทึกเรียบร้อยแล้ว", MsgBoxStyle.OkOnly, "แจ้งผลการทำงาน")
+            'Else
+            'MsgBox("ข้อมูลยังไม่ได้ถูกบันทึก", MsgBoxStyle.OkOnly, "แจ้งผลการทำงาน")
+            'End If
+
         Catch errprocess As Exception
-            'MessageBox.Show("ไม่สามารถลบข้อมูลได้เนื่องจาก " & errprocess.Message, "ข้อผิดพลาด", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            'MessageBox.Show("ไม่สามารถเพิ่มข้อมูลได้เนื่องจาก " & errprocess.Message, "ข้อผิดพลาด", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Exit Sub
         End Try
     End Sub
@@ -215,12 +206,15 @@ Module DBtools
         Try
             ' If MessageBox.Show("ต้องการบันทึกข้อมูล ' " & txtDisy & " ' ที่ระบุหรือไม่", "คำยืนยัน", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
 
+            openDB()
+
             With subCom
                 .CommandType = CommandType.Text
                 .CommandText = txtSQL
                 .Connection = Conn
                 .ExecuteNonQuery()
             End With
+            'closeDB()
             'DB01.Execute(txtSQL)  ' บันทึกข้อมูลลง Business 
             'DB02.Execute(txtSQL)
             'MsgBox("ข้อมูลถูกบันทึกเรียบร้อยแล้ว", MsgBoxStyle.OkOnly, "แจ้งผลการทำงาน")
@@ -234,27 +228,6 @@ Module DBtools
         End Try
     End Sub
 
-    Sub dbSaveSQLsrv(ByVal txtSQL As String, ByVal txtDisy As String)
-
-        Try
-            'If MessageBox.Show("ต้องการบันทึกข้อมูล ' " & txtDisy & " ' ที่ระบุหรือไม่", "คำยืนยัน", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
-
-
-
-            With subCom
-                .CommandType = CommandType.Text
-                .CommandText = txtSQL
-                .Connection = Conn
-                .ExecuteNonQuery()
-            End With
-            'DB01.Execute(txtSQL) ' บันทึกข้อมูลลง Business 
-            'DB02.Execute(txtSQL) ' บันทึกข้อมูลลง Business acct50
-            'End If
-        Catch errprocess As Exception
-            'MessageBox.Show("ไม่สามารถเพิ่มข้อมูลได้เนื่องจาก " & errprocess.Message & "กด OK เพื่อดำเนินการต่อ ", "ข้อผิดพลาด", MessageBoxButtons.OK, MessageBoxIcon.Error)
-            Exit Sub
-        End Try
-    End Sub
 
     'Sub readDB()
     '    Dim ansTB As String
@@ -276,13 +249,15 @@ Module DBtools
 
     '    End With
     'End Sub
+
     Sub dbSaveUser(ByVal txtSQL As String, ByVal txtDisy As String)
 
 
         Try
 
             If Conn.State = ConnectionState.Closed Then
-                DBtools.DBConnection()
+                DBtools.openDB()
+
             End If
             With subCom
                 .CommandType = CommandType.Text
@@ -628,6 +603,113 @@ Module DBtools
     '    End Try
     '    Return ver
     'End Function
+    Function chkDocTranDataH(ByVal DocNo As String, ByVal DocType As String, ByVal stkCode As String) As Boolean
+        Dim ans As Boolean
+
+        Dim subDA As SqlClient.SqlDataAdapter
+        Dim subDS As New DataSet
+        If Trim(DocNo) = "" Then
+            subDS = Nothing
+            subDA = Nothing
+            Return False
+        Else
+            'DBtools.openDB()
+            txtSQL = "Select * "
+            txtSQL = txtSQL & "From TranDataH "
+
+            txtSQL = txtSQL & "WHERE (Trh_Type='" & DocType & "' "
+            txtSQL = txtSQL & "And (Trh_No='" & DocNo & "')"
+            'txtSQL = txtSQL & "And (dtl_idTrade='" & stkCode & "') "
+            txtSQL = txtSQL & ") "
+
+            subDA = New SqlClient.SqlDataAdapter(txtSQL, Conn)
+            subDA.Fill(subDS, "stkList")
+
+            If subDS.Tables("stkList").Rows.Count > 0 Then
+                ans = True
+            Else
+                ans = False
+            End If
+
+            subDS = Nothing
+            subDA = Nothing
+            'DBtools.closeDB()
+            Return ans
+        End If
+
+    End Function
+
+    Function chkDocTranDataD(ByVal DocNo As String, ByVal DocType As String, ByVal stkCode As String) As Boolean
+        Dim ans As Boolean
+
+        Dim subDA As SqlClient.SqlDataAdapter
+        Dim subDS As New DataSet
+        If Trim(DocNo) = "" Then
+            subDS = Nothing
+            subDA = Nothing
+            Return False
+        Else
+            'DBtools.openDB()
+            txtSQL = "Select * "
+            txtSQL = txtSQL & "From TranDataD_E "
+
+            txtSQL = txtSQL & "WHERE ((dtl_Type='" & DocType & "') "
+            txtSQL = txtSQL & "And (dtl_No='" & DocNo & "')"
+            'txtSQL = txtSQL & "And (dtl_idTrade='" & stkCode & "') "
+            txtSQL = txtSQL & ") "
+
+            subDA = New SqlClient.SqlDataAdapter(txtSQL, Conn)
+            subDA.Fill(subDS, "stkList")
+
+            If subDS.Tables("stkList").Rows.Count > 0 Then
+                ans = True
+            Else
+                ans = False
+            End If
+
+            subDS = Nothing
+            subDA = Nothing
+            'DBtools.closeDB()
+            Return ans
+        End If
+
+    End Function
+
+    Function getDocNumberH(ByVal DocNo As String, ByVal DocType As String, ByVal stkCode As String) As Boolean
+        Dim ans As Boolean
+
+        Dim subDA As SqlClient.SqlDataAdapter
+        Dim subDS As New DataSet
+        If Trim(DocNo) = "" Then
+            subDS = Nothing
+            subDA = Nothing
+            Return False
+        Else
+            'DBtools.openDB()
+            txtSQL = "Select * "
+            txtSQL = txtSQL & "From TranDataH_E "
+
+            txtSQL = txtSQL & "WHERE ((Trh_Type='" & DocType & "') "
+            txtSQL = txtSQL & "And (Trh_No='" & DocNo & "')"
+            'txtSQL = txtSQL & "And (dtl_idTrade='" & stkCode & "') "
+            txtSQL = txtSQL & ") "
+
+            subDA = New SqlClient.SqlDataAdapter(txtSQL, Conn)
+            subDA.Fill(subDS, "stkList")
+
+            If subDS.Tables("stkList").Rows.Count > 0 Then
+                ans = True
+            Else
+                ans = False
+            End If
+
+            subDS = Nothing
+            subDA = Nothing
+            'DBtools.closeDB()
+            Return ans
+        End If
+
+    End Function
 
     Function getDocNumberD(ByVal DocNo As String, ByVal DocType As String, ByVal stkCode As String) As Boolean
         Dim ans As Boolean
@@ -641,11 +723,11 @@ Module DBtools
         Else
             'DBtools.openDB()
             txtSQL = "Select * "
-            txtSQL = txtSQL & "From TranDataD "
+            txtSQL = txtSQL & "From TranDataD_E "
 
             txtSQL = txtSQL & "WHERE ((dtl_Type='" & DocType & "') "
             txtSQL = txtSQL & "And (dtl_No='" & DocNo & "')"
-            txtSQL = txtSQL & "And (dtl_idTrade='" & stkCode & "') "
+            'txtSQL = txtSQL & "And (dtl_idTrade='" & stkCode & "') "
             txtSQL = txtSQL & ") "
 
             subDA = New SqlClient.SqlDataAdapter(txtSQL, Conn)
@@ -1358,7 +1440,7 @@ Module DBtools
             txtSQL = txtSQL & ")"
 
         End If
-        Call DBtools.dbSaveSQLsrv(txtSQL, "")
+        Call DBtools.dbSaveDATA(txtSQL, "")
         subDS3 = Nothing
         subDA3 = Nothing
 
@@ -1369,7 +1451,7 @@ Module DBtools
         txtSQL = txtSQL & "Set Stk_PC_Name='" & pcName & "' "
         txtSQL = txtSQL & "Where stk_Code='" & stkCode & "' "
 
-        Call DBtools.dbSaveSQLsrv(txtSQL, "")
+        Call DBtools.dbSaveDATA(txtSQL, "")
 
 
     End Sub
@@ -1510,7 +1592,7 @@ Module DBtools
         txtSQL = txtSQL & "Set Stk_Find_Word ='" & stkFindWord & "' "
         txtSQL = txtSQL & "Where stk_Code ='" & stkCode & "' "
 
-        Call DBtools.dbSaveSQLsrv(txtSQL, "")
+        Call DBtools.dbSaveDATA(txtSQL, "")
 
 
     End Sub
@@ -1551,8 +1633,8 @@ Module DBtools
             With subDS.Tables("StkList").Rows(0)
 
                 ProdID = Trim(.Item("Stk_Prod"))
-                TypeID = Trim(ProdID) & Trim(.Item("Type_Code"))
-                GrpID = Trim(ProdID) & Trim(TypeID) & .Item("Grp_Code")
+                TypeID = Trim(.Item("Type_Code"))
+                GrpID = .Item("Grp_Code")
                 ColorID = .Item("Color_Code")
                 ThID = .Item("Th_Code")
                 SizeID = .Item("Size_Code")
@@ -1635,7 +1717,7 @@ Module DBtools
         txtSQL = txtSQL & "Set Stk_Code_N ='" & stkNewCode & "' "
         txtSQL = txtSQL & "Where stk_Code ='" & stkCode & "' "
 
-        Call DBtools.dbSaveSQLsrv(txtSQL, "")
+        Call DBtools.dbSaveDATA(txtSQL, "")
 
 
     End Sub
@@ -1697,12 +1779,12 @@ Module DBtools
                 txtSQL = txtSQL & "And Grp_Code='" & GrpID & "' "
                 subDA = New SqlClient.SqlDataAdapter(txtSQL, Conn)
                 subDA.Fill(subDS, "GrpList")
-                If IsDBNull(subDS.Tables("GrpList").Rows(0).Item("Grp_StkName")) Then
+
+                If IsDBNull(subDS.Tables("GrpList").Rows(0).Item("Grp_StkName")) Or subDS.Tables("GrpList").Rows(0).Item("Grp_StkName")="" Then
                     grpName = ""
                 Else
                     grpName = subDS.Tables("GrpList").Rows(0).Item("Grp_StkName")
                 End If
-
 
                 '==================================================================
 
@@ -1793,7 +1875,7 @@ Module DBtools
         txtSQL = txtSQL & "Set Stk_Name_2='" & genStkName2New(stkCode) & "' "
         txtSQL = txtSQL & "Where stk_Code ='" & stkCode & "' "
 
-        Call DBtools.dbSaveSQLsrv(txtSQL, "")
+        Call DBtools.dbSaveDATA(txtSQL, "")
 
 
     End Sub
@@ -1939,7 +2021,7 @@ Module DBtools
             txtSQL = txtSQL & ")"
 
         End If
-        Call DBtools.dbSaveSQLsrv(txtSQL, "")
+        Call DBtools.dbSaveDATA(txtSQL, "")
         subDS3 = Nothing
         subDA3 = Nothing
 
@@ -2001,12 +2083,112 @@ Module DBtools
             txtSQL = txtSQL & "And Dtl_Code='" & dtlCode & "' "
             txtSQL = txtSQL & "And Dtl_Wh='" & dtlWH & "' "
 
-            DBtools.dbSaveSQLsrv(txtSQL, "")
+            DBtools.dbSaveDATA(txtSQL, "")
         End If
         DBtools.closeDB()
 
     End Sub
+    '
+    Function getDocNumberH_PM(ByVal DocNo As String) As Boolean
+        Dim ans As Boolean
 
+        Dim subDA As SqlClient.SqlDataAdapter
+        Dim subDS As New DataSet
+        If Trim(DocNo) = "" Then
+
+            subDS = Nothing
+            subDA = Nothing
+            Return False
+        Else
+            DBtools.openDB()
+            txtSQL = "Select * "
+            txtSQL = txtSQL & "From TranDataH_PM "
+
+            txtSQL = txtSQL & "WHERE Trh_No='" & DocNo & "' "
+            'txtSQL = txtSQL & "And ()) "
+            'txtSQL=txtSQL & "And Trh_Wh='" & "'"  ' ใส่ข้อมูล คลังสินค้า
+
+            subDA = New SqlClient.SqlDataAdapter(txtSQL, Conn)
+            subDA.Fill(subDS, "stkList")
+
+            If subDS.Tables("stkList").Rows.Count > 0 Then
+                ans = True
+            Else
+                ans = False
+            End If
+
+            subDS = Nothing
+            subDA = Nothing
+            DBtools.closeDB()
+            Return ans
+        End If
+
+    End Function
+
+    Function getDocNumberD_PM(ByVal DocNo As String) As Boolean
+        Dim ans As Boolean
+
+        Dim subDA As SqlClient.SqlDataAdapter
+        Dim subDS As New DataSet
+        If Trim(DocNo) = "" Then
+            subDS = Nothing
+            subDA = Nothing
+            Return False
+        Else
+            'DBtools.openDB()
+            txtSQL = "Select * "
+            txtSQL = txtSQL & "From TranDataD_PM "
+
+            txtSQL = txtSQL & "WHERE dtl_No='" & DocNo & "'"
+            'txtSQL = txtSQL & "And ()"
+            'txtSQL = txtSQL & "And (dtl_idTrade='" & stkCode & "') "
+            'txtSQL = txtSQL & ") "
+
+            subDA = New SqlClient.SqlDataAdapter(txtSQL, Conn)
+            subDA.Fill(subDS, "stkList")
+
+            If subDS.Tables("stkList").Rows.Count > 0 Then
+                ans = True
+            Else
+                ans = False
+            End If
+
+            subDS = Nothing
+            subDA = Nothing
+            'DBtools.closeDB()
+            Return ans
+        End If
+
+    End Function
+
+    Sub updateClockLock(dataLock As Integer)
+
+        Dim subDS1 As New DataSet
+        Dim subDA1 As SqlClient.SqlDataAdapter
+
+
+        txtSQL = "Select * "
+        txtSQL = txtSQL & "FRom ClockMast "
+        txtSQL = txtSQL & "Order by Clock_Update desc "
+
+        subDA1 = New SqlClient.SqlDataAdapter(txtSQL, Conn)
+        subDA1.Fill(subDS1, "chkClock")
+
+        Dim strClockNo As String
+        If IsDBNull(subDS1.Tables("chkClock").Rows(0).Item("Clock_No")) Then
+            strClockNo = ""
+        Else
+
+            strClockNo = subDS1.Tables("chkClock").Rows(0).Item("Clock_No")
+        End If
+
+
+        txtSQL = "Update ClockMast set Clock_Lock='" & dataLock & "' "
+        txtSQL = txtSQL & "Where Clock_No='" & strClockNo & "' "
+
+        DBtools.dbSaveSQLsrv(txtSQL,"")
+
+    End Sub
 
     'Public Function ceiling(ByVal strvat As Decimal) As Decimal
     '    Math.Ceiling(strvat)

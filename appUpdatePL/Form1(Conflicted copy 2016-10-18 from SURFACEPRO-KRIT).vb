@@ -41,7 +41,7 @@
         ExcelName = "แผนผลิต" & monthSel & "-" & yearSel & ".xlsm"
         ExcelName2 = "แผนผลิตเล็ก" & monthSel & "-" & yearSel & ".xlsm"
         ExcelName3 = "รายงานติดกระดาษ(" & monthSel & "-" & Mid((yearSel + 543), 3, 2) & ").xlsm"
-        DBtools.DBConnection()
+        DBtools.openDB()
         'MsgBox(ExcelName)
         lbDataBase.Text = DBConnString.strConn2
         Format(Month(Now), "00")
@@ -249,9 +249,9 @@
         Dim objExcelWorkBook As Microsoft.Office.Interop.Excel.Workbook
         Dim objExcelWorkSheet As Microsoft.Office.Interop.Excel.Worksheet
 
-        Dim objExcelErr As Microsoft.Office.Interop.Excel.Application
-        Dim objExcelWorkBookErr As Microsoft.Office.Interop.Excel.Workbook
-        Dim objExcelWorkSheetErr As Microsoft.Office.Interop.Excel.Worksheet
+        'Dim objExcelErr As Microsoft.Office.Interop.Excel.Application
+        'Dim objExcelWorkBookErr As Microsoft.Office.Interop.Excel.Workbook
+        'Dim objExcelWorkSheetErr As Microsoft.Office.Interop.Excel.Worksheet
 
         Dim rwErr As Integer = 4
         Dim countRow As Integer
@@ -268,7 +268,7 @@
         'objExcel.Visible = False   'ไม่ต้องเปิด Excel ขึ้นมา
         'objExcel.Visible = True   'ไม่ต้องเปิด Excel ขึ้นมา
 
-        objExcelErr = New Microsoft.Office.Interop.Excel.Application
+        'objExcelErr = New Microsoft.Office.Interop.Excel.Application
         'objExcelErr.Visible = True  'ไม่ต้องเปิด Excel ขึ้นมา
         'objExcelErr.Visible = False 'ไม่ต้องเปิด Excel ขึ้นมา
 
@@ -278,9 +278,9 @@
         objExcelWorkSheet.Activate()
 
 
-        objExcelWorkBookErr = objExcelErr.Workbooks.Open(fileErr, 0, 1)
-        objExcelWorkSheetErr = objExcelWorkBookErr.Worksheets("sheet1") '47
-        objExcelWorkSheetErr.Activate()
+        'objExcelWorkBookErr = objExcelErr.Workbooks.Open(fileErr, 0, 1)
+        'objExcelWorkSheetErr = objExcelWorkBookErr.Worksheets("sheet1") '47
+        'objExcelWorkSheetErr.Activate()
 
         rwLast = objExcelWorkSheet.Rows.SpecialCells(Microsoft.Office.Interop.Excel.XlCellType.xlCellTypeVisible).Row
         'ActiveCell.SpecialCells(xlCellTypeLastCell).Row
@@ -404,25 +404,26 @@
                     Else
 
                         'MsgBox("ผิดพลาด")
-                        With objExcelWorkSheetErr
+                        'With objExcelWorkSheetErr
 
 
-                            objExcelWorkSheetErr.Activate()
-                            'objExcelErr.WindowState = Microsoft.Office.Interop.Excel.XlWindowState.xlMaximized
-                            With objExcelErr
+                        '    objExcelWorkSheetErr.Activate()
+                        '    'objExcelErr.WindowState = Microsoft.Office.Interop.Excel.XlWindowState.xlMaximized
+                        '    With objExcelErr
 
-                                '.Range("B" & rwErr + 1).Select()
-                                .Range("B" & rwErr + 1).Value = (trh_Date).ToString
-                                '.Range("C" & rwErr + 1).Select()
-                                .Range("C" & rwErr + 1).Value = trh_No
-                                '.Range("D" & rwErr + 1).Select()
-                                .Range("D" & rwErr + 1).Value = dtl_N_Trade
-                                '.Range("E" & rwErr + 1).Select()
-                                .Range("E" & rwErr + 1).Value = dtl_idTrade
+                        '        '.Range("B" & rwErr + 1).Select()
+                        '        .Range("B" & rwErr + 1).Value = (trh_Date).ToString
+                        '        '.Range("C" & rwErr + 1).Select()
+                        '        .Range("C" & rwErr + 1).Value = trh_No
+                        '        '.Range("D" & rwErr + 1).Select()
+                        '        .Range("D" & rwErr + 1).Value = dtl_N_Trade
+                        '        '.Range("E" & rwErr + 1).Select()
+                        '        .Range("E" & rwErr + 1).Value = dtl_idTrade
 
-                            End With
-                        End With
-                        'objExcelErr.WindowState = Microsoft.Office.Interop.Excel.XlWindowState.xlMinimized
+                        '    End With
+                        'End With
+
+                        ''objExcelErr.WindowState = Microsoft.Office.Interop.Excel.XlWindowState.xlMinimized
                         rwErr = rwErr + 1
                     End If
                     objExcelWorkSheet.Activate()
@@ -463,9 +464,9 @@
         'MsgBox("row  =" & countRow - 4)
         'objExcel.Workbooks.Close()
         'objExcelErr.WindowState = Microsoft.Office.Interop.Excel.XlWindowState.xlMaximized
-        objExcelErr = Nothing
-        objExcelWorkBookErr = Nothing
-        objExcelWorkSheetErr = Nothing
+        'objExcelErr = Nothing
+        'objExcelWorkBookErr = Nothing
+        'objExcelWorkSheetErr = Nothing
 
         objExcel = Nothing
         objExcelWorkBook = Nothing
